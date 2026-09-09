@@ -1,5 +1,6 @@
 using CatFactLogger.Models;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace CatFactLogger.Services;
 
