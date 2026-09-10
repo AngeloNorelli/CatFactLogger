@@ -6,6 +6,7 @@
 	<UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<ApplicationIcon>Assets\cat.ico</ApplicationIcon>
 	<RootNamespace>CatFactLogger</RootNamespace>
   </PropertyGroup>
 
@@ -24,5 +25,9 @@
 	<None Update="appsettings.json">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</None>
+  </ItemGroup>
+
+  <ItemGroup>
+	<Resource Include="Assets\cat.ico" />
   </ItemGroup>
 </Project>
