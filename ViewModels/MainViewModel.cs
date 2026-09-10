@@ -18,6 +18,8 @@ public class MainViewModel : INotifyPropertyChanged
     _apiClient = apiClient;
     _fileWriter = fileWriter;
     FetchFactCommand = new RelayCommand(FetchFactAsync);
+
+    _ = LoadHistoryAsync();
   }
 
   public ObservableCollection<string> History { get; } = [];
@@ -31,6 +33,15 @@ public class MainViewModel : INotifyPropertyChanged
   }
 
   public ICommand FetchFactCommand { get; }
+
+  private async Task LoadHistoryAsync() {
+    var lines = await _fileWriter.ReadAllLinesAsync();
+    if (lines.Count == 0) return;
+
+    foreach (var line in lines.Reverse()) {
+      History.Add(line);
+    }
+  }
 
   public async Task FetchFactAsync() 
   {

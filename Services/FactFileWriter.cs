@@ -98,6 +98,22 @@ public class FactFileWriter : IFactFileWriter
     }
   }
 
+  public async Task<IReadOnlyList<string>> ReadAllLinesAsync(CancellationToken cancellationToken = default) 
+  {
+    try 
+    {
+      if (!File.Exists(FilePath)) 
+      {
+        return [];
+      }
+      var lines = await File.ReadAllLinesAsync(FilePath, cancellationToken);
+      return lines;
+    } catch (Exception ) 
+    {
+      return [];
+    }
+  }
+
   public async Task AppendFactAsync(CatFact fact, CancellationToken cancellationToken = default)
   {
     var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length} | fact={fact.Fact}";
