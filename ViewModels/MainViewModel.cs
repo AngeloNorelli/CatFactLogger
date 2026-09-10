@@ -20,7 +20,7 @@ public class MainViewModel : INotifyPropertyChanged
     FetchFactCommand = new RelayCommand(FetchFactAsync);
   }
 
-  public ObservableCollection<string> History { get; } = new();
+  public ObservableCollection<string> History { get; } = [];
 
   public string FilePath => Path.GetFullPath(_fileWriter.FilePath);
 

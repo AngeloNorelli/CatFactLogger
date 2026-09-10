@@ -16,8 +16,12 @@ public partial class  App: Application
     base.OnStartup(e);
 
     var builder = Host.CreateApplicationBuilder();
+
+    var configuredBase = builder.Configuration["CatFactApi:BaseUrl"]
+      ?? throw new InvalidOperationException("Missing configuration for CatFactApi:BaseUrl");
+
     builder.Services.AddHttpClient<ICatFactApiClient, CatFactApiClient>(client => {
-      client.BaseAddress = new Uri("https://catfact.ninja/");
+      client.BaseAddress = new Uri(configuredBase);
       client.Timeout = TimeSpan.FromSeconds(10);
     });
 
