@@ -23,7 +23,8 @@
 			   Grid.Row="1" 
 			   ItemsSource="{Binding History}"
 			   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-			   HorizontalAlignment="Stretch">
+			   HorizontalAlignment="Stretch"
+               FontFamily="Consolas">
 		<ListBox.ItemContainerStyle>
 		  <Style TargetType="ListBoxItem">
 			<Setter Property="HorizontalContentAlignment" Value="Stretch"/>

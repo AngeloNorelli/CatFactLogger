@@ -116,7 +116,7 @@ public class FactFileWriter : IFactFileWriter
 
   public async Task AppendFactAsync(CatFact fact, CancellationToken cancellationToken = default)
   {
-    var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length} | fact={fact.Fact}";
+    var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length,3} | fact={fact.Fact}";
 
     await _lock.WaitAsync(cancellationToken);
     try

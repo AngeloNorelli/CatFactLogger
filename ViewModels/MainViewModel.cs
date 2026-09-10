@@ -56,7 +56,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     await _fileWriter.AppendFactAsync(fact);
 
-    History.Insert(0, $"{DateTime.Now:HH:mm:ss} - {fact.Fact} ({fact.Length} characters)");
+    History.Insert(0, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length,3} | fact={fact.Fact}");
     StatusText = "Fact fetched and saved successfully.";
   }
 
