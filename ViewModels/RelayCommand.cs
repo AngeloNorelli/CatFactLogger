@@ -3,12 +3,9 @@ using System.Windows.Input;
 
 namespace CatFactLogger.ViewModels;
 
-public class RelayCommand : ICommand 
+public class RelayCommand(Func<Task> executeAsync) : ICommand 
 {
-  private readonly Func<Task> _executeAsync;
   private bool _isExecuting;
-
-  public RelayCommand(Func<Task> executeAsync) => _executeAsync = executeAsync;
 
   public event EventHandler? CanExecuteChanged;
   public bool CanExecute(object? parameter) => !_isExecuting;
@@ -18,7 +15,7 @@ public class RelayCommand : ICommand
     _isExecuting = true;
     CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     try {
-      await _executeAsync();
+      await executeAsync();
     } finally {
       _isExecuting = false;
       CanExecuteChanged?.Invoke(this, EventArgs.Empty);

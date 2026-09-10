@@ -4,27 +4,16 @@ using System.IO;
 
 namespace CatFactLogger.Services;
 
-public class CatFactAppService : BackgroundService
-{
-  private readonly ICatFactApiClient _apiClient;
-  private readonly IFactFileWriter _fileWriter;
-  private readonly IHostApplicationLifetime _lifetime;
-
-  public CatFactAppService(
+public class CatFactAppService(
     ICatFactApiClient apiClient,
     IFactFileWriter fileWriter,
-    IHostApplicationLifetime lifetime,
-    ILogger<CatFactAppService> logger)
-  {
-    _apiClient = apiClient;
-    _fileWriter = fileWriter;
-    _lifetime = lifetime;
-  }
+    IHostApplicationLifetime lifetime) : BackgroundService
+{
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
     Console.WriteLine("=== Cat Fact Logger ===");
-    Console.WriteLine($"Output file: {Path.GetFullPath(_fileWriter.FilePath)}");
+    Console.WriteLine($"Output file: {Path.GetFullPath(fileWriter.FilePath)}");
     Console.WriteLine();
 
     while (!stoppingToken.IsCancellationRequested)
@@ -37,7 +26,7 @@ public class CatFactAppService : BackgroundService
         break;
       }
 
-      var fact = await _apiClient.GetRandomFactAsync(stoppingToken);
+      var fact = await apiClient.GetRandomFactAsync(stoppingToken);
       if (fact is null)
       {
         Console.WriteLine("Failed to fetch a cat fact.");
@@ -45,13 +34,13 @@ public class CatFactAppService : BackgroundService
         continue;
       }
 
-      await _fileWriter.AppendFactAsync(fact, stoppingToken);
+      await fileWriter.AppendFactAsync(fact, stoppingToken);
 
       Console.WriteLine($"[OK] \"{fact.Fact}\" (length: {fact.Length})");
       Console.WriteLine();
     }
 
     Console.WriteLine("Exiting...");
-    _lifetime.StopApplication();
+    lifetime.StopApplication();
   }
 }
