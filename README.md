@@ -9,8 +9,8 @@ Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ``` bash
 cd CatFactLogger
-dotner restore
-dotner run
+dotnet restore
+dotnet run
 ```
 
 Once running:
