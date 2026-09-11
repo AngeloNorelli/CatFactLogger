@@ -10,13 +10,13 @@ Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and **Windows*
 
 ``` bash
 cd CatFactLogger
-dotner restore
-dotner run
+dotnet restore
+dotnet run
 ```
 
 Or open the solution in Visual Studio and press **F5** to run the application.
 
-Once the windwo opens, click **Fetch Cat Fact** to send a request to the API. Each click:
+Once the window opens, click **Fetch Cat Fact** to send a request to the API. Each click:
 - fetches a new fact from `catfact.ninja`,
 - appends it to `cat_facts.txt` (one fact per line),
 - adds it ot the on-screen history list.
