@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using CatFactLogger.Models;
 
 namespace CatFactLogger.Services;
@@ -6,7 +7,8 @@ namespace CatFactLogger.Services;
 public class CatFactAppService(
     ICatFactApiClient apiClient,
     IFactFileWriter fileWriter,
-    IHostApplicationLifetime lifetime) : BackgroundService
+    IHostApplicationLifetime lifetime,
+    IConfiguration configuration) : BackgroundService
 {
   private readonly List<CatFact> _facts = [];
 
@@ -42,7 +44,7 @@ public class CatFactAppService(
   {
     Console.Clear();
 
-    const int width = 70;
+    var width = int.Parse(configuration["Console:Width"] ?? "100");
     
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine("╭" + new string('─', width) + "╮");
@@ -86,7 +88,7 @@ public class CatFactAppService(
     Console.ResetColor();
   }
 
-  private void PrintFact(CatFact fact, int width)
+  private static void PrintFact(CatFact fact, int width)
   {
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine("|" + Pad(fact.Fact, width) + "|");
