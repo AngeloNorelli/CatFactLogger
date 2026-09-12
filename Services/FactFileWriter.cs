@@ -10,17 +10,112 @@ public class FactFileWriter : IFactFileWriter
 
   public FactFileWriter(IConfiguration configuration)
   {
-    FilePath = configuration["OutputFile:Path"] ?? "cat_facts.txt";
-
-    if (!File.Exists(FilePath))
+    var configured = configuration["OutputFile:Path"];
+    if (string.IsNullOrEmpty(configured))
     {
-      File.Create(FilePath).Dispose();
+      FilePath = GetDefaultFilePath();
+    }
+    else 
+    {
+      FilePath = ResolveConfiguredPath(configured);
+    }
+
+    EnsureFileExists(FilePath);
+  }
+
+  private static string GetDefaultFilePath() 
+  {
+    var projectRoot = Path.GetFullPath(
+      Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
+
+    return Path.Combine(projectRoot, "cat_facts.txt");
+  }
+
+  private static string ResolveConfiguredPath(string configuredPath) 
+  {
+    configuredPath = Environment.ExpandEnvironmentVariables(configuredPath);
+
+    try 
+    {
+      var path = Path.IsPathRooted(configuredPath)
+        ? configuredPath
+        : Path.Combine(
+          Path.GetFullPath(
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..")),
+          configuredPath);
+
+      return Path.GetFullPath(path);
+    }
+    catch (Exception ex) when (
+      ex is ArgumentException ||
+      ex is NotSupportedException) 
+    {
+      throw new InvalidOperationException(
+        $"Invalid configuration 'OutputFile:Path': '{configuredPath}'.",
+        ex);
+    }
+  }
+
+  private static void EnsureFileExists(string filePath) 
+  {
+    try 
+    {
+      var directory = Path.GetDirectoryName(filePath);
+      if (string.IsNullOrWhiteSpace(directory))
+      {
+        throw new InvalidOperationException(
+          $"Invalid configuration 'OutputFile:Path': '{filePath}'." +
+          "The path does not contain a valid directory."
+          );    
+      }
+
+      if (!Directory.Exists(directory)) 
+      {
+        throw new InvalidOperationException(
+          $"Invalid configuration 'OutputFile:Path':" +
+          $"The directory '{directory}' does not exist.");
+      }
+
+      if (!File.Exists(filePath)) 
+      {
+        File.Create(filePath).Dispose();
+      }
+    } 
+    catch (UnauthorizedAccessException ex) 
+    {
+      throw new InvalidOperationException(
+        $"Cannot write to configured output file '{filePath}'." +
+        "The application does not have sufficient permissions.",
+        ex);
+    }
+    catch (IOException ex) 
+    {
+      throw new InvalidOperationException(
+        $"Cannot create or access output file '{filePath}'." +
+        "Check that the path is valid and accessible",
+        ex);
+    }
+  }
+
+  public async Task<IReadOnlyList<string>> ReadAllLinesAsync(CancellationToken cancellationToken = default) 
+  {
+    try 
+    {
+      if (!File.Exists(FilePath)) 
+      {
+        return [];
+      }
+      var lines = await File.ReadAllLinesAsync(FilePath, cancellationToken);
+      return lines;
+    } catch (Exception ) 
+    {
+      return [];
     }
   }
 
   public async Task AppendFactAsync(CatFact fact, CancellationToken cancellationToken = default)
   {
-    var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length, -3} | fact={fact.Fact}";
+    var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length,3} | fact={fact.Fact}";
 
     await _lock.WaitAsync(cancellationToken);
     try

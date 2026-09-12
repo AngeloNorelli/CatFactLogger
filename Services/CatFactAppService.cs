@@ -10,7 +10,22 @@ public class CatFactAppService(
     IHostApplicationLifetime lifetime,
     IConfiguration configuration) : BackgroundService
 {
-  private readonly List<CatFact> _facts = [];
+  private readonly List<CatFact> _facts = [
+    .. fileWriter.ReadAllLinesAsync()
+        .Result
+        .Select(line => 
+        {
+          var parts = line.Split(" | ");
+          var length = int.Parse(parts[1].Replace("length=", ""));
+          var fact = parts[2].Replace("fact= ", "").Trim();
+          
+          return new CatFact 
+          { 
+            Length = length, 
+            Fact = fact 
+          };
+        })
+    ];
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
