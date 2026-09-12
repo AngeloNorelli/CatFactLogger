@@ -14,4 +14,10 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="CatFactLogger.Tests\**" />
+    <Content Remove="CatFactLogger.Tests\**" />
+    <None Remove="CatFactLogger.Tests\**" />
+  </ItemGroup>
+
 </Project>
