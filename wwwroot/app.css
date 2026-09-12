@@ -39,7 +39,17 @@ h1:focus {
 }
 
 .btn-success {
-
+	--bs-btn-font-family: 'Space Grotesk', sans-serif;
+	--bs-btn-font-weight: 600;
+	--bs-btn-bg: var(--accent);
+	--bs-btn-border-color: var(--accent);
+	--bs-btn-hover-bg: var(--accent-hover);
+	--bs-btn-hover-border-color: var(--accent-hover);
+	--bs-btn-active-bg: var(--accent-hover);
+	--bs-btn-active-border-color: var(--accent-hover);
+	--bs-btn-disabled-bg: #9CA79B;
+	--bs-btn-disabled-border-color: #9CA79B;
+	--bs-btn-focus-shadow-rgb: 47, 110, 93;
 }
 
 .log-table {
