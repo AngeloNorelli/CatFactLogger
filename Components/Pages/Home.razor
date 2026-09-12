@@ -1,46 +1,77 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using System.Text.RegularExpressions
 @using CatFactLogger.Services
 @inject ICatFactApiClient ApiClient
 @inject IFactFileWriter FileWriter
 
 <PageTitle>Cat Fact Logger</PageTitle>
 
-<h1>Cat Fact Logger</h1>
+<header class="log-header pb-3 mb-4 border-bottom border-2">
+  <h1 class="mb-1">Cat Fact Logger</h1>
+  <p calss="text-muted mb-0">Welcome to the Cat Fact Logger!</p>
+</header>
 
-<p>
-  <button class="btn btn-primary" @onclick="FetchFactAsync" disabled="@_isLoading">
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <button class="btn btn-success" @onclick="FetchFactAsync" disabled="@_isLoading">
     @(_isLoading ? "Fetching..." : "Fetch Cat Fact")
   </button>
-</p>
+  <span class="text-muted small">Number of facts: @_history.Count</span>
+</div>
 
 @if (!string.IsNullOrEmpty(_errorMessage)) 
 {
   <p class="text-danger">@_errorMessage</p>    
 }
 
-@if (_history.Count > 0) 
-{
-  <h2>History (@_history.Count)</h2>
-  <ul class="list-group mb-3">
-    @foreach (var item in _history.AsEnumerable().Reverse()) 
-    {
-      <li class="list-group-item">@item</li>
+<table class="table table-hover align-middle log-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th class="text-end">Length</th>
+      <th>Fact</th>
+    </tr>
+  </thead>
+  <tbody>
+    @if (_history.Count > 0) {
+      @foreach (var entry in _history.AsEnumerable().Reverse()) {
+        <tr>
+          <td class="col-time">@entry.Timestamp</td>
+          <td class="col-length">@entry.Length</td>
+          <td>@entry.Fact</td>
+        </tr>
+      }
+    } else {
+      <tr>
+        <td colspan="3" class="text-muted fst-italic text-center py-4">
+          No cat facts logged yet. Click the "Fetch Cat Fact" button to get started!
+        </td>
+      </tr>
     }
-  </ul>
-}
+  </tbody>
+</table>
 
-<p class="text-muted"><small>File: @FileWriter.FilePath</small></p>
+<p class="text-muted small file-path">File: @FileWriter.FilePath</p>
 
 @code {
-  private readonly List<string> _history = [];
+  private sealed record LogEntry(string Timestamp, string Length, string Fact);
+  private static readonly Regex LineFormat = new(
+    @"^(?<ts>\S+ \S+)\s*\|\s*length=\s*(?<len>\d+)\s*\|\s*fact=(?<fact>.*)$",
+    RegexOptions.Compiled);  
+
+  private readonly List<LogEntry> _history = [];
   private bool _isLoading;
   private string? _errorMessage;
 
   protected override async Task OnInitializedAsync() 
   {
     var lines = await FileWriter.ReadAllLinesAsync();
-    _history.AddRange(lines);
+    foreach (var line in lines) {
+      var entry = ParseLine(line);
+      if (entry is not null) {
+        _history.Add(entry);
+      }
+    }
   }
 
   private async Task FetchFactAsync() 
@@ -56,9 +87,20 @@
     else 
     {
       await FileWriter.AppendFactAsync(fact);
-      _history.Add($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length,3} | fact={fact.Fact}");
+      _history.Add(new LogEntry(
+        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+        fact.Length.ToString(),
+        fact.Fact));
     }
 
     _isLoading = false;
+  }
+
+  private static LogEntry? ParseLine(string line) 
+  {
+    var match = LineFormat.Match(line);
+    return match.Success
+      ? new LogEntry(match.Groups["ts"].Value, match.Groups["len"].Value, match.Groups["fact"].Value)
+      : null;
   }
 }
