@@ -1,0 +1,64 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using CatFactLogger.Services
+@inject ICatFactApiClient ApiClient
+@inject IFactFileWriter FileWriter
+
+<PageTitle>Cat Fact Logger</PageTitle>
+
+<h1>Cat Fact Logger</h1>
+
+<p>
+  <button class="btn btn-primary" @onclick="FetchFactAsync" disabled="@_isLoading">
+    @(_isLoading ? "Fetching..." : "Fetch Cat Fact")
+  </button>
+</p>
+
+@if (!string.IsNullOrEmpty(_errorMessage)) 
+{
+  <p class="text-danger">@_errorMessage</p>    
+}
+
+@if (_history.Count > 0) 
+{
+  <h2>History (@_history.Count)</h2>
+  <ul class="list-group mb-3">
+    @foreach (var item in _history.AsEnumerable().Reverse()) 
+    {
+      <li class="list-group-item">@item</li>
+    }
+  </ul>
+}
+
+<p class="text-muted"><small>File: @FileWriter.FilePath</small></p>
+
+@code {
+  private readonly List<string> _history = [];
+  private bool _isLoading;
+  private string? _errorMessage;
+
+  protected override async Task OnInitializedAsync() 
+  {
+    var lines = await FileWriter.ReadAllLinesAsync();
+    _history.AddRange(lines);
+  }
+
+  private async Task FetchFactAsync() 
+  {
+    _isLoading = true;
+    _errorMessage = null;
+
+    var fact = await ApiClient.GetRandomFactAsync();
+    if (fact is null) 
+    {
+      _errorMessage = "Failed to fetch a cat fact. Please try again.";
+    } 
+    else 
+    {
+      await FileWriter.AppendFactAsync(fact);
+      _history.Add($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | length={fact.Length,3} | fact={fact.Fact}");
+    }
+
+    _isLoading = false;
+  }
+}
