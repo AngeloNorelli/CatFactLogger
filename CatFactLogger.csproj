@@ -10,5 +10,10 @@
   <ItemGroup>
     <None Include="wwwroot\cat.png" />
   </ItemGroup>
-
+	
+	<ItemGroup>
+		<Compile Remove="CatFactLogger.Tests\**" />
+		<Content Remove="CatFactLogger.Tests\**" />
+		<None Remove="CatFactLogger.Tests\**" />
+	</ItemGroup>
 </Project>
